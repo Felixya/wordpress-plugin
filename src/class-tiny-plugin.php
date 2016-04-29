@@ -58,6 +58,8 @@ class Tiny_Plugin extends Tiny_WP_Base {
         $plugin = plugin_basename(dirname(dirname(__FILE__)) . '/tiny-compress-images.php');
         add_filter("plugin_action_links_$plugin", $this->get_method('add_plugin_links'));
         add_thickbox();
+
+        add_action('wr2x_retina_file_added', $this->get_method('compress_retina_image'), 10, 3);
     }
 
     public function admin_menu() {
@@ -96,6 +98,16 @@ class Tiny_Plugin extends Tiny_WP_Base {
             'L10nWaiting' => __('Waiting', 'tiny-compress-images'),
         ));
         wp_enqueue_script($handle);
+    }
+
+    public function compress_retina_image($attachment_id, $path, $name) {
+        echo "compress_retina_image: " . $path . "<br/>";
+
+        $tiny_metadata = new Tiny_Metadata($attachment_id);
+
+        $compressor = $this->settings->get_compressor();
+        $response = $compressor->compress_file($path, false, false);
+        var_dump($response);
     }
 
     private function compress($metadata, $attachment_id) {
